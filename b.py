@@ -9,7 +9,7 @@ def zt(d2):
         .reset_index(name='count') \
         .sort_values(['count'], ascending=False) \
         .head(5)
-    print(t3)
+    # print(t3)
     return t3.max()
 
 def lishui_data():
@@ -29,9 +29,12 @@ if __name__ == '__main__':
     df = lishui_data()
     d2 = df[['k1','k2','ZBKZJ']]
     d2 =d2[d2['k1'] !=0 ]
-    length = 100
+    length = 50
     result = d2.sample(n=length)
-    print(zt(result))
+    print(zt(result)['k1'])
+
+
+
 
 
 

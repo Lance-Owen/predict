@@ -24,13 +24,13 @@ from xgboost import XGBRegressor as XGBR
 df = pd.read_csv('lishui.csv', encoding='gbk')
 
 
-d2 = df[['ZBKZJ','k1','kbjj']]
+d2 = df[['ZBKZJ','k1']]
 d2 =d2[d2['k1'] !=0 ]
 
 #提取数据
 d1 = d2.dropna().reset_index(drop=True)
-X = d1.drop(columns=['kbjj'])
-y = d1['kbjj']
+X = d1.drop(columns=['k1'])
+y = d1['k1']
 X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.2,shuffle=True,random_state=8)
 poly = PolynomialFeatures(degree=1)
 
@@ -67,7 +67,7 @@ reg = XGBR(n_estimators=100)
 reg.fit(x_train,y_train)
 print(f"xgbbost测试集得分：{round(reg.score(x_test,y_test),2)}") #你能想出这里应该返回什么模型评估指标么?
 
-apply = np.array([16868631.80,0.9]).reshape(1,-1)
+apply = np.array([19396110.3]).reshape(1,-1)
 #apply = np.array([67583073.37,0.94,0.4]).reshape(1,-1)
 poly_apply = poly.fit_transform(apply)
 r1=la.predict(poly_apply)
