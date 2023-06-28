@@ -33,7 +33,7 @@ df = df.sort_values(by=['ZBKZJ'])
 
 
 plt.rcParams['font.sans-serif']=['SimHei']
-plt.hist(df['下浮率'], bins=30, density=True, alpha=0.6, color='g')
+plt.hist(df_test['下浮率'], bins=30, density=True, alpha=0.6, color='g')
 # plt.hist(df['ZBKZJ'], bins=3000, density=True, alpha=0.6, color='g')
 plt.xlabel('X轴标签')
 plt.ylabel('Y轴标签')
