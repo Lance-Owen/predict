@@ -93,24 +93,24 @@ df = lishui_data("丽水市第一页数据.csv")
 # df_test = df[df['Date']>='2023-06']     #[['ZBKZJ','k1']]
 # df_test = df
 
-df['rule1'] = df['k1'].apply(lambda x:rule1(df_total))
+df['rule1'] = df['k1'].apply(lambda x: rule1(df_total))
 df['rule1_result'] = abs(df['下浮率'] - df['rule1'])
-df['rule2'] = df['k1'].apply(lambda x:rule2(df_total))
+df['rule2'] = df['k1'].apply(lambda x: rule2(df_total))
 df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
-df['rule3'] = df['k1'].apply(lambda x:rule3(df_total))
+df['rule3'] = df['k1'].apply(lambda x: rule3(df_total))
 df['rule3_result'] = abs(df['下浮率'] - df['rule3'])
 df['rule4'] = df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3
 df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
-print(len(df[df['rule1_result']<1]),len(df[df['rule2_result']<1]),len(df[df['rule3_result']<1]),len(df[df['rule4_result']<1]))
-print(len(df[df['rule1_result']==0]),len(df[df['rule2_result']==0]),len(df[df['rule3_result']==0]),len(df[df['rule4_result']==0]))
+print(len(df[df['rule1_result'] < 1]), len(df[df['rule2_result'] < 1]), len(df[df['rule3_result'] < 1]), len(df[df['rule4_result']<1]))
+print(len(df[df['rule1_result'] == 0]), len(df[df['rule2_result'] == 0]), len(df[df['rule3_result'] == 0]), len(df[df['rule4_result']==0]))
 
 # plt.plot(range(len(df_test)),df_test[['下浮率','rule1','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
 # plt.legend()
 # plt.show()
-df.to_csv('lishui测试.csv',index=False)
+df.to_csv('lishui测试.csv', index=False)
 
 
-plt.hist(df['下浮率'],bins=20)
+plt.hist(df['下浮率'], bins=20)
 
 
 
