@@ -12,10 +12,12 @@ def get_date(str_time:str):
     return s
 
 def read_file(file_path):
-    with open(file_path, 'rb') as f:
-        result = chardet.detect(f.read())
-    encoding = result['encoding']
-    df = pd.read_csv(file_path,encoding=encoding)
+    for ed in ['gbk','utf-8']:
+        try:
+            df = pd.read_csv(file_path, encoding=ed)
+            break
+        except:
+            pass
     return df
 
 def zt(d2):
@@ -53,14 +55,9 @@ def rule2(df):
 def rule3(df):
     return round(df['下浮率'].mean()+random.uniform(-0.6,0.6),2)
 
-def lishui_data(filename):
-    # df = read_file('lishui.csv')
-    if filename == 'lishui.csv':
-        df = pd.read_csv(filename,encoding='gbk')
-    else:
-        df = pd.read_csv("丽水市第一页数据.csv",encoding='utf-8')
+def lishui_data(file_path):
+    df = read_file(file_path)
     df['k1'] = 0
-    # df =df[df['k1'] !=0 ]
     df['zbkzj'] = df['zbkzj'].astype(float)
     df['kbjj'] = df['kbjj'].astype(float)
 
