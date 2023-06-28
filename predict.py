@@ -1,23 +1,15 @@
-import pandas as pd
-import numpy as np
-import pandas as pd
 from tools import *
-import random
-import time
-from matplotlib import pyplot as plt
-import seaborn as sns
-from sklearn.model_selection import train_test_split
-from sklearn.preprocessing import PolynomialFeatures
-from sklearn.linear_model import Lasso
-from sklearn.ensemble import RandomForestRegressor
-from sklearn.tree import DecisionTreeRegressor
-from sklearn.neighbors import KNeighborsRegressor
-from sklearn.linear_model import LogisticRegression as LR         # 逻辑回归
-from sklearn.metrics import precision_score, recall_score, f1_score,accuracy_score
-from sklearn.metrics import confusion_matrix
-from sklearn.model_selection import GridSearchCV
-from xgboost import XGBRegressor as XGBR
 import matplotlib.pyplot as plt
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.tree import DecisionTreeRegressor
+from xgboost import XGBRegressor as XGBR
+
+from tools import *
+
 
 def train_model_predict(df):
         
