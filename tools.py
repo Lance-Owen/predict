@@ -89,8 +89,8 @@ def luan_data():
 
 
 def huainan_data():
-    # df = read_file("lishui.csv")
-    df = pd.read_csv('huainan.csv', encoding='utf-8')
+    df = read_file("huainan.csv")
+    # df = pd.read_csv('huainan.csv', encoding='utf-8')
 
     # df = df[df['k1']>0]
     # df = df[df['k2']>0]
