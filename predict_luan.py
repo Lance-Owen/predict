@@ -5,7 +5,12 @@ from tools import *
 df_total = luan_data()
 
 
-
+sql = "SELECT id,county,classify,project_type,zbkzj,k1,k2,kbjj,publish_time,source_website_address,numbers_bidders,trade_method FROM tender_bid_opening WHERE city = '六安市' ORDER BY publish_time desc LIMIT 100"
+df = mysql_select_df(sql)
+df = df[df['zbkzj'] > df["kbjj"]]
+df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
+df = df[df['下浮率'] > 6]
+df = df[df['下浮率'] < 12]
 
 
 df = df_total

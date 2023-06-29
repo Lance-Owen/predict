@@ -45,7 +45,7 @@ def get_prediction_interval(df, target_value):
 
 
 def rule1(df):
-    length = int(len(df) * 0.1)
+    length = int(len(df) * 0.3)
     df = df.sample(n=length)
     k1_list = df['下浮率'].values.tolist()
     if k1_list.count(max(k1_list, key=k1_list.count)) == 1:
@@ -56,7 +56,7 @@ def rule1(df):
 
 def rule2(df, target_value):
     # df = get_prediction_interval(df,target_value)
-    length = int(len(df) * 0.2)
+    length = int(len(df) * 0.3)
     df = df.sample(n=length)
     k1_list = df['下浮率'].values.tolist()
     k1_dict = {}
@@ -64,13 +64,13 @@ def rule2(df, target_value):
         k1_dict[key] = k1_list.count(key)
     return_k1 = 0
     for k, v in k1_dict.items():
-        return_k1 += round(int(k) * int(v) / len(k1_list), 2)
+        return_k1 += round(int(k) * int(v) / len(k1_list), 1)
     return return_k1
 
 
 def rule3(df, target_value):
     df = get_prediction_interval(df, target_value)
-    return round(df['下浮率'].mean() + random.uniform(-0.6, 0.6), 2)
+    return round(df['下浮率'].mean() + random.uniform(-0.6, 0.6), 1)
 
 def huainan_kc(df,choice):
     length = int(len(df) * 0.1)
@@ -166,14 +166,14 @@ def huainan_data():
         for i, value in zip(range(max(df[key])), enc.inverse_transform(range(max(df[key])))):
             print(f"{key}：数字  {i}  代表  {value}")
 
-    df = df[['zbkzj', 'project_type', '下浮率', 'k1', 'k2']]  # 'county','classify','trade_method',,'stage'
+    # df = df[['zbkzj', 'project_type', '下浮率', 'k1', 'k2']]  # 'county','classify','trade_method',,'stage'
 
     # df1 = df[df['project_type'] == '房屋建筑工程']
     # plt.plot(range(len(df1)),df1[['下浮率']],marker = 'o',label = ['下浮率','rule1','rule2'])
     # plt.legend()
     # plt.show()
 
-    # df.to_csv('淮南.csv')
+    # df.to_csv('淮南预测值对比.csv', index=False, encoding='utf-8')
 
     return df
 

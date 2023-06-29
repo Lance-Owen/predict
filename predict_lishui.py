@@ -19,7 +19,7 @@ def train_model_predict(df):
     d1 = d2.dropna().reset_index(drop=True)
     X = d1.drop(columns=['kbjj'])
     y = d1['kbjj']
-    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.3,shuffle=True,random_state=8)
+    X_train, X_test, y_train, y_test = train_test_split(X, y,test_size=0.3,shuffle=True,random_state=9)
     poly = PolynomialFeatures(degree=1)
 
 
@@ -82,22 +82,21 @@ df_total = lishui_data('lishui.csv')
 file = '丽水市测试数据0629.csv'
 df = lishui_data(file)
 
-df = df_total
+# df = df_total
 print(len(df))
 
 df['rule1'] = df['zbkzj'].apply(lambda x: rule1(df_total))
 df['rule1_result'] = abs(df['下浮率'] - df['rule1'])
 print(len(df[df['rule1_result'] < 1]),len(df[df['rule1_result'] == 0]))
 
-df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total,x))
+df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total, x))
 df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
-print(len(df[df['rule2_result'] < 1]),len(df[df['rule2_result'] == 0]))
-
+print(len(df[df['rule2_result'] < 1]), len(df[df['rule2_result'] == 0]))
 print(f"下浮率误差1%以内命中率：{round(len(df[df['rule2_result'] < 1])/len(df),2)*100}%，下浮率命中率：{round(len(df[df['rule2_result'] == 0])/len(df),2)*100}%")
 
 df['rule3'] = df['zbkzj'].apply(lambda x: rule3(df_total, x))
 df['rule3_result'] = abs(df['下浮率'] - df['rule3'])
-print(len(df[df['rule3_result'] < 1]),len(df[df['rule3_result'] == 0]))
+print(len(df[df['rule3_result'] < 1]), len(df[df['rule3_result'] == 0]))
 print(f"下浮率误差1%以内命中率：{round(len(df[df['rule3_result'] < 1])/len(df),2)*100}%，下浮率命中率：{round(len(df[df['rule3_result'] == 0])/len(df),2)*100}%")
 
 df['rule4'] = round(df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3,2)
@@ -105,7 +104,7 @@ df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
 print(len(df[df['rule4_result'] < 1]), len(df[df['rule4_result'] == 0]))
 
 
-# df.to_csv(f'{file.split(".")[0]}_结果.csv', index=False)
+df.to_csv('丽水预测结果.csv', index=False)
 
 # plt.plot(range(len(df)),df[['下浮率','rule3','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
 # plt.legend()
@@ -119,57 +118,13 @@ print(len(df[df['rule4_result'] < 1]), len(df[df['rule4_result'] == 0]))
 
 
 
-
-
-
-
 #
 #
-# #导入网格搜索模块
-# from sklearn.model_selection import GridSearchCV
-# rfr_best = RandomForestRegressor()
-# params ={'n_estimators':range(10,20,1)}
-# gs = GridSearchCV(rfr_best, params, cv=4)
-# gs.fit(X_train,Y_train)
-#
-# #查验优化后的超参数配置
-# print(gs.best_score_)
-# print(gs.best_params_)
+
 #
 #
 #
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-# df_test[['线性回归', "随机森林",'决策树','K近邻','XGB','预测值']] = df_test.apply(lambda x:record_predict(df_train,x['ZBKZJ']),axis=1,result_type='expand')
-# df_train[['线性回归', "随机森林",'决策树','K近邻','XGB','预测值']] = df_train.apply(lambda x:record_predict(df_train,x['ZBKZJ']),axis=1,result_type='expand')
-
-
-
-
-# df_test.to_csv('预测值对比.csv',index=False)
-
-# import matplotlib.pyplot as plt
-# plt.rcParams['font.sans-serif']=['SimHei']
-# plt.plot(range(len(df_test)),df_test[['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值']],marker = 'o',label = ['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值'])
-# plt.legend()
-# plt.show()
-
-# chatgpt_k1 = [8.3, 7.6, 9.1, 8.8, 7.9, 8.5, 7.2, 9.0, 8.2, 8.6, 7.7, 8.4, 8.1, 7.8, 8.0, 7.5, 8.7, 7.4, 8.9, 7.3, 8.8, 7.6, 9.2, 8.3, 7.9, 9.1, 8.5, 7.7, 9.0, 8.6, 7.8, 8.7, 7.5, 8.9, 7.4, 8.8, 7.6, 9.3, 8.4, 7.9, 9.2, 8.5, 7.7, 9.1, 8.6, 7.8, 9.0, 8.7, 7.5, 9.2]
-# df_test['chatgpt_k1'] = chatgpt_k1[:30]
-
-# plt.plot(range(len(df_test)),df_test[['下浮率', "chatgpt_k1"]],marker = 'o')
-
-# plt.sc
 

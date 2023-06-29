@@ -1,5 +1,4 @@
-from tools import *
-import matplotlib.pyplot as plt
+import numpy as np
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.linear_model import Lasso
 from sklearn.model_selection import train_test_split
@@ -7,7 +6,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor as XGBR
-import numpy as np
+
 from tools import *
 
 
@@ -31,7 +30,7 @@ def train_model_predict(df):
     # print(f'线性回归测试集得分：{round(la.score(x_test,y_test),2)}')
 
     # 随机森林回归
-    rf = RandomForestRegressor(n_jobs=-1)
+    rf = RandomForestRegressor(n_jobs=-1, max_depth=None, min_samples_leaf=1, min_samples_split=13, n_estimators=10)
     rf.fit(x_train, y_train)
     # print(f'随机森林回归训练集得分：{round(rf.score(x_train,y_train),2)}')
     # print(f'随机森林回归测试集得分：{round(rf.score(x_test,y_test),2)}')
@@ -48,7 +47,7 @@ def train_model_predict(df):
     # print(f'k近邻回归测试集得分：{round(kn.score(x_test,y_test),2)}')
 
     # XGBbost
-    xgb = XGBR(n_estimators=100)
+    xgb = XGBR(n_estimators=10)
     xgb.fit(x_train, y_train)
     # print(f"xgbbost测试集得分：{round(xgb.score(x_test,y_test),2)}") #你能想出这里应该返回什么模型评估指标么?
 
@@ -71,8 +70,10 @@ def record_predict(df_train, predict_value):
     res = (sum(predict_list) - max(predict_list) - min(predict_list)) / 2
 
     xgb_mean = sum([rf.predict(poly_apply), kn.predict(poly_apply), xgb.predict(poly_apply)]) / 3
+
+    print(xgb.predict(poly_apply).tolist()[0],xgb_mean[0],res)
     return la.predict(poly_apply).tolist()[0], rf.predict(poly_apply).tolist()[0], dt.predict(poly_apply).tolist()[0], \
-    kn.predict(poly_apply).tolist()[0], res  # ,xgb.predict(poly_apply).tolist()[0],xgb_mean[0]
+        kn.predict(poly_apply).tolist()[0], res#, xgb.predict(poly_apply).tolist()[0],
 
 
 ### 淮南市
@@ -101,6 +102,7 @@ df_train = df_total[['zbkzj', 'project_type', '下浮率']]
 sql = "SELECT id,county,classify,project_type,zbkzj,k1,k2,kbjj,publish_time,source_website_address,numbers_bidders,trade_method FROM tender_bid_opening WHERE city = '淮南市' ORDER BY publish_time desc LIMIT 100"
 df = mysql_select_df(sql)
 
+df = df_total
 df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].astype(float)
 df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].fillna(0)
 df = df[(df['k1'] > 0) & (df['k2'] > 0) & (df['k1'] < 1) & (df['k2'] < 1)]
@@ -113,11 +115,13 @@ df = df.fillna('')
 #
 df['project_label'] = df['project_type'].apply(
     lambda s: 0 if s == '公路工程' else 1 if s == '市政公用工程' else 2 if s == '建筑工程' else 3)
+# df['project_label'] = 0
 df['预测下浮率'] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']])[-1], axis=1)
 
 df['result'] = abs(df['下浮率'] - df['预测下浮率'])
 
-print(f"下浮率误差1%以内命中率：{round(len(df[df['result'] < 1]) / len(df), 2) * 100}%，下浮率命中率：{round(len(df[df['result'] == 0]) / len(df), 2) * 100}%")
+print(
+    f"下浮率误差1%以内命中率：{round(len(df[df['result'] < 1]) / len(df), 2) * 100}%，下浮率命中率：{round(len(df[df['result'] == 0]) / len(df), 2) * 100}%")
 
 df['predict_k1'] = df['zbkzj'].apply(lambda x: huainan_kc(df_total, 'k1'))
 df['k1_result'] = abs(df['k1'] - df['predict_k1'])
@@ -126,3 +130,32 @@ df['k2_result'] = abs(df['k2'] - df['predict_k2'])
 
 print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
 print(f"k2命中率：{round(len(df[df['k2_result'] == 0]) / len(df), 2) * 100}%")
+
+print(f"k1和k2命中率：{round(len(df[(df['k1_result'] == 0) & (df['k2_result'] == 0)]) / len(df), 2) * 100}%")
+
+
+
+# df_test[['线性回归', "随机森林",'决策树','K近邻','XGB','预测值']] = df_test.apply(lambda x:record_predict(df_train,x['ZBKZJ']),axis=1,result_type='expand')
+# df[['线性回归', "随机森林",'决策树','K近邻','预测值']] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']]), axis=1)
+    # df.apply(lambda x: record_predict(df_train, x['zbkzj']), axis=1, result_type='expand')
+
+
+
+
+# df.to_csv('淮南预测值对比.csv',index=False,encoding='utf-8')
+
+# import matplotlib.pyplot as plt
+# plt.rcParams['font.sans-serif']=['SimHei']
+# plt.plot(range(len(df_test)),df_test[['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值']],marker = 'o',label = ['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值'])
+# plt.legend()
+# plt.show()
+
+
+import numpy as np
+x = [1,2,9,5,6]
+b=x[1:4]
+sorted(b,reverse=True)
+
+
+b = np.array([1,2,3])*np.array([3,2,1])
+type(b)
