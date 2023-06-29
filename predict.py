@@ -7,7 +7,7 @@ from sklearn.neighbors import KNeighborsRegressor
 from sklearn.preprocessing import PolynomialFeatures
 from sklearn.tree import DecisionTreeRegressor
 from xgboost import XGBRegressor as XGBR
-
+import numpy as np
 from tools import *
 
 
@@ -80,37 +80,74 @@ def record_predict(df_train,KZJ):
 
 
 
+### 淮南市 
+df = huainan_data()
+
+rule2(df,210000)
+df_train,df_test = train_test_split(df,test_size=0.3,shuffle=True,random_state=8)
+KZJ = 2100000
+record_predict(df_train,KZJ)
+
+
+df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total,x))
+df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
+print(len(df[df['rule2_result'] < 1]),len(df[df['rule2_result'] == 0]))
+
+
+df[df['zbkzj'] == KZJ].iloc[0]['kbjj']
+
+# plt.plot(range(len(df)),df[['zbkzj','kbjj']],marker = 'o',label = ['zbkzj','kbjj'])
+# plt.scatter(df['zbkzj'],df['下浮率'],marker='o')
+plt.scatter(range(len(df)),df['下浮率'],marker='o')
+plt.hist(df['下浮率'],range(6,13,))
+plt.legend()
+plt.show()
+
+df.to_csv('huainan预测值对比.csv',index=False)
+
+
+
+
+
+
+
+
 
 
 ### 丽水市
 df_total = lishui_data('lishui.csv')
+df = lishui_data("lishui.csv")
 
-
-df = lishui_data("丽水市第一页数据.csv")
-
+rule2(df_total,2100000)
 
 # df_train = df[df['Date']<'2023-06']     #[['ZBKZJ','k1']]
 # df_test = df[df['Date']>='2023-06']     #[['ZBKZJ','k1']]
 # df_test = df
 
-df['rule1'] = df['k1'].apply(lambda x: rule1(df_total))
-df['rule1_result'] = abs(df['下浮率'] - df['rule1'])
-df['rule2'] = df['k1'].apply(lambda x: rule2(df_total))
+# df['rule1'] = df['k1'].apply(lambda x: rule1(df_total))
+# df['rule1_result'] = abs(df['下浮率'] - df['rule1'])
+# print(len(df[df['rule1_result'] < 1]),len(df[df['rule1_result'] == 0]))
+
+df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total,x))
 df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
-df['rule3'] = df['k1'].apply(lambda x: rule3(df_total))
+print(len(df[df['rule2_result'] < 1]),len(df[df['rule2_result'] == 0]))
+
+df['rule3'] = df['zbkzj'].apply(lambda x: rule3(df_total, x))
 df['rule3_result'] = abs(df['下浮率'] - df['rule3'])
-df['rule4'] = df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3
-df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
-print(len(df[df['rule1_result'] < 1]), len(df[df['rule2_result'] < 1]), len(df[df['rule3_result'] < 1]), len(df[df['rule4_result'] < 1]))
-print(len(df[df['rule1_result'] == 0]), len(df[df['rule2_result'] == 0]), len(df[df['rule3_result'] == 0]), len(df[df['rule4_result'] == 0]))
+print(len(df[df['rule3_result'] < 1]),len(df[df['rule3_result'] == 0]))
 
-# plt.plot(range(len(df_test)),df_test[['下浮率','rule1','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
-# plt.legend()
-# plt.show()
-df.to_csv('lishui测试.csv', index=False)
+# df['rule4'] = df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3
+# df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
+# print(len(df[df['rule4_result'] < 1]), len(df[df['rule4_result'] == 0]))
 
 
-plt.hist(df['下浮率'], bins=20)
+plt.plot(range(len(df)),df[['下浮率','rule3','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
+plt.legend()
+plt.show()
+df.to_csv('lishui测试2.csv', index=False)
+
+
+# plt.hist(df['下浮率'], bins=20)
 
 
 
@@ -123,23 +160,20 @@ df = luan_data()
 
 
 
+#导入网格搜索模块
+from sklearn.model_selection import GridSearchCV
+rfr_best = RandomForestRegressor()
+params ={'n_estimators':range(10,20,1)}
+gs = GridSearchCV(rfr_best, params, cv=4)
+gs.fit(X_train,Y_train)
+ 
+#查验优化后的超参数配置
+print(gs.best_score_)
+print(gs.best_params_)
 
 
 
-### 淮南市 
-df = huainan_data()
-df_train,df_test = train_test_split(df,test_size=0.3,shuffle=True,random_state=8)
-KZJ = 2473043.39
-record_predict(df_train,KZJ)
 
-df[df['zbkzj'] == KZJ].iloc[0]['kbjj']
-
-# plt.plot(range(len(df)),df[['zbkzj','kbjj']],marker = 'o',label = ['zbkzj','kbjj'])
-plt.scatter(df['zbkzj'],df['下浮率'],marker='o')
-plt.legend()
-plt.show()
-
-df.to_csv('huainan预测值对比.csv',index=False)
 
 
 
