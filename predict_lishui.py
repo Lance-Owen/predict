@@ -57,7 +57,6 @@ def train_model_predict(df):
 
     return la,rf,dt,kn,xgb
 
-
 def record_predict(df_train,KZJ):
     predict_k1 = zt(df.sample(n=8))['k1']
     predict_k2 = zt(df.sample(n=8))['k2']
@@ -76,34 +75,6 @@ def record_predict(df_train,KZJ):
     xgb_mean = sum([rf.predict(poly_apply),kn.predict(poly_apply),xgb.predict(poly_apply)])/3
     return la.predict(poly_apply).tolist()[0],rf.predict(poly_apply).tolist()[0],dt.predict(poly_apply).tolist()[0],kn.predict(poly_apply).tolist()[0],res#,xgb.predict(poly_apply).tolist()[0],xgb_mean[0]
 
-
-
-
-
-### 淮南市 
-df = huainan_data()
-
-rule2(df,210000)
-df_train,df_test = train_test_split(df,test_size=0.3,shuffle=True,random_state=8)
-KZJ = 2100000
-record_predict(df_train,KZJ)
-
-
-df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total,x))
-df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
-print(len(df[df['rule2_result'] < 1]),len(df[df['rule2_result'] == 0]))
-
-
-df[df['zbkzj'] == KZJ].iloc[0]['kbjj']
-
-# plt.plot(range(len(df)),df[['zbkzj','kbjj']],marker = 'o',label = ['zbkzj','kbjj'])
-# plt.scatter(df['zbkzj'],df['下浮率'],marker='o')
-plt.scatter(range(len(df)),df['下浮率'],marker='o')
-plt.hist(df['下浮率'],range(6,13,))
-plt.legend()
-plt.show()
-
-df.to_csv('huainan预测值对比.csv',index=False)
 
 
 

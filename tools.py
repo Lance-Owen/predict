@@ -131,7 +131,6 @@ def huainan_data():
     # 审查字段分离情况
     # df = df[df['stage'] ==""]
     # df = df[df['industy'] ==""]
-    # df = df[df['project_type'] !=""]
 
 
     # df.to_csv('淮南.csv')
