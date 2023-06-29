@@ -102,3 +102,45 @@ def huainan_data():
     df = df[df['下浮率'] < 20]
 
     return df
+
+import pandas as pd
+import numpy as np
+
+# 假设你的历史数据存储在名为df的DataFrame中，有一个名为'value'的列存储了数据，其中存在缺失值
+
+# 假设你要找到插值后的某个目标数据
+target_value = 15
+
+# 使用插值方法填充缺失值（这里使用线性插值方法）
+df_filled = df['value'].interpolate()
+
+# 找到插值后目标数据的索引
+target_index = np.abs(df_filled - target_value).idxmin()
+
+# 提取插值后目标数据前后的两个数据点
+start_index = max(target_index - 2, 0)
+end_index = min(target_index + 2, len(df_filled) - 1)
+data_slice = df.iloc[start_index: end_index + 1]
+
+# 打印前后两个数据点
+print(data_slice)
+
+
+
+import pandas as pd
+
+# 假设你的数据存储在名为df的DataFrame中，且有一个名为'target_data'的列存储了你的目标数据
+
+# 假设目标数据位于数值lower_value和upper_value之间
+lower_value = 10
+upper_value = 20
+
+# 找到目标数据所在的索引范围
+start_index = df[df['target_data'] > lower_value].index.min() - 200
+end_index = df[df['target_data'] < upper_value].index.max() + 200
+
+# 提取目标数据前后的200条数据
+data_slice = df.iloc[start_index: end_index + 1]
+
+# 打印数据切片的其他字段信息
+print(data_slice.drop('target_data', axis=1))

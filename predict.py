@@ -101,8 +101,8 @@ df['rule3'] = df['k1'].apply(lambda x: rule3(df_total))
 df['rule3_result'] = abs(df['下浮率'] - df['rule3'])
 df['rule4'] = df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3
 df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
-print(len(df[df['rule1_result'] < 1]), len(df[df['rule2_result'] < 1]), len(df[df['rule3_result'] < 1]), len(df[df['rule4_result']<1]))
-print(len(df[df['rule1_result'] == 0]), len(df[df['rule2_result'] == 0]), len(df[df['rule3_result'] == 0]), len(df[df['rule4_result']==0]))
+print(len(df[df['rule1_result'] < 1]), len(df[df['rule2_result'] < 1]), len(df[df['rule3_result'] < 1]), len(df[df['rule4_result'] < 1]))
+print(len(df[df['rule1_result'] == 0]), len(df[df['rule2_result'] == 0]), len(df[df['rule3_result'] == 0]), len(df[df['rule4_result'] == 0]))
 
 # plt.plot(range(len(df_test)),df_test[['下浮率','rule1','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
 # plt.legend()
