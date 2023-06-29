@@ -77,23 +77,11 @@ def record_predict(df_train,KZJ):
 
 
 
-
-
-
-
-
-
-
-
 ### 丽水市
 df_total = lishui_data('lishui.csv')
-df = lishui_data("lishui.csv")
+file = '丽水市测试数据0629.csv'
+df = lishui_data(file)
 
-rule2(df_total,2100000)
-
-# df_train = df[df['Date']<'2023-06']     #[['ZBKZJ','k1']]
-# df_test = df[df['Date']>='2023-06']     #[['ZBKZJ','k1']]
-# df_test = df
 
 # df['rule1'] = df['k1'].apply(lambda x: rule1(df_total))
 # df['rule1_result'] = abs(df['下浮率'] - df['rule1'])
@@ -103,19 +91,24 @@ df['rule2'] = df['zbkzj'].apply(lambda x: rule2(df_total,x))
 df['rule2_result'] = abs(df['下浮率'] - df['rule2'])
 print(len(df[df['rule2_result'] < 1]),len(df[df['rule2_result'] == 0]))
 
+print(f"下浮率误差1%以内命中率：{round(len(df[df['rule2_result'] < 1])/len(df),2)*100}%，下浮率误差1%以内命中率：{round(len(df[df['rule2_result'] == 1])/len(df),2)*100}%")
+
 df['rule3'] = df['zbkzj'].apply(lambda x: rule3(df_total, x))
 df['rule3_result'] = abs(df['下浮率'] - df['rule3'])
 print(len(df[df['rule3_result'] < 1]),len(df[df['rule3_result'] == 0]))
+print(f"下浮率误差1%以内命中率：{round(len(df[df['rule3_result'] < 1])/len(df),2)*100}%，下浮率误差1%以内命中率：{round(len(df[df['rule3_result'] == 1])/len(df),2)*100}%")
 
 # df['rule4'] = df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3
 # df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
 # print(len(df[df['rule4_result'] < 1]), len(df[df['rule4_result'] == 0]))
 
 
-plt.plot(range(len(df)),df[['下浮率','rule3','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
-plt.legend()
-plt.show()
-df.to_csv('lishui测试2.csv', index=False)
+# df.to_csv(f'{file.split(".")[0]}_结果.csv', index=False)
+
+# plt.plot(range(len(df)),df[['下浮率','rule3','rule2']],marker = 'o',label = ['下浮率','rule1','rule2'])
+# plt.legend()
+# plt.show()
+# df.to_csv('lishui测试2.csv', index=False)
 
 
 # plt.hist(df['下浮率'], bins=20)
@@ -124,26 +117,25 @@ df.to_csv('lishui测试2.csv', index=False)
 
 
 
-### 六安市
-df = luan_data()
 
 
 
 
-
-#导入网格搜索模块
-from sklearn.model_selection import GridSearchCV
-rfr_best = RandomForestRegressor()
-params ={'n_estimators':range(10,20,1)}
-gs = GridSearchCV(rfr_best, params, cv=4)
-gs.fit(X_train,Y_train)
- 
-#查验优化后的超参数配置
-print(gs.best_score_)
-print(gs.best_params_)
-
-
-
+#
+#
+# #导入网格搜索模块
+# from sklearn.model_selection import GridSearchCV
+# rfr_best = RandomForestRegressor()
+# params ={'n_estimators':range(10,20,1)}
+# gs = GridSearchCV(rfr_best, params, cv=4)
+# gs.fit(X_train,Y_train)
+#
+# #查验优化后的超参数配置
+# print(gs.best_score_)
+# print(gs.best_params_)
+#
+#
+#
 
 
 
@@ -179,120 +171,3 @@ print(gs.best_params_)
 
 # plt.sc
 
-
-# # x.index(max(x))
-# x.index(min(x))
-
-
-
-
-# # 遍历所有数据，得到KZJ
-# #     生成k1
-# #     训练模型做预测，但是每调用一次，模型会变化一次，当生成两个k的时候，调用两次会模型训练数据效果不一致，期望同一个模型，不同k
-
-
-
-
-import numpy as np
-import matplotlib.pyplot as plt
-random_data = df['下浮率'].values.tolist()
-avg_data = list()
-for i in range(0, 10000):
-    one_sum = 0
-    for j in range(0, 50):
-        one_sum += random_data[np.random.randint(0, len(df))]
-    avg_data.append(one_sum *1.0 / 50.0)
-print(avg_data)
-plt.hist(avg_data, bins=100)
-plt.show()
-
-
-
-
-import numpy as np
-
-# 生成随机数据
-np.random.seed(42)  # 设置随机种子，以保证结果可复现
-# data = np.random.uniform(6, 15, size=1000)  # 生成1000个在6到15之间的随机数
-
-# # 划分数据区间
-# bins = np.linspace(6, 15, num=10)  # 将数据范围划分为10个区间
-
-
-data = df['下浮率'].values.tolist()
-bins = np.linspace(max(data), min(data), num=10)
-num_bins = 10
-bins = np.linspace(6, 15, num_bins + 1)  # Create bins with equal width
-
-# Calculate histogram
-hist, _ = np.histogram(data, bins=bins)
-
-# Find the bin with the maximum count
-max_index = np.argmax(hist)
-max_bin_start = bins[max_index]
-max_bin_end = bins[max_index + 1]
-
-# Calculate the percentage of data in the max bin
-total_data = len(data)
-max_bin_count = hist[max_index]
-max_bin_percentage = (max_bin_count / total_data) * 100
-
-# Output the result
-print(f"The data interval with the highest percentage is [{max_bin_start}, {max_bin_end})")
-print(f"It contains {max_bin_percentage:.2f}% of the data.")
-
-
-import numpy as np
-
-def find_optimal_intervals(data, k):
-    n = len(data)
-    data_sorted = sorted(data)
-
-    dp = np.zeros((n, k+1))
-    prev = np.zeros((n, k+1), dtype=int)
-
-    for i in range(n):
-        dp[i][1] = (i+1) / n
-
-    for j in range(2, k+1):
-        for i in range(j-1, n):
-            max_val = -np.inf
-            max_prev = 0
-            for p in range(i):
-                val = dp[p][j-1] + (i-p) / n
-                if val > max_val:
-                    max_val = val
-                    max_prev = p
-            dp[i][j] = max_val
-            prev[i][j] = max_prev
-
-    max_val = np.max(dp[:, k])
-    max_idx = np.argmax(dp[:, k])
-
-    intervals = []
-    for _ in range(k, 0, -1):
-        start = prev[max_idx][k]
-        interval = (data_sorted[start], data_sorted[max_idx])
-        intervals.append(interval)
-        max_idx = start
-        k -= 1
-
-    return max_val, intervals[::-1]
-
-# Generate random data
-np.random.seed(42)
-data = np.random.uniform(6, 15, size=1000)
-
-# Set the number of intervals
-num_intervals = 10
-
-data = df['下浮率'].values.tolist()
-
-# Find the optimal intervals
-max_percentage, intervals = find_optimal_intervals(data, num_intervals)
-
-# Output the result
-print(f"The optimal intervals with the maximum percentage are:")
-for i, interval in enumerate(intervals):
-    print(f"Interval {i+1}: {interval}")
-print(f"They collectively contain {max_percentage*100:.2f}% of the data.")

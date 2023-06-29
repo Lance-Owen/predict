@@ -75,18 +75,17 @@ def rule3(df,target_value):
 def lishui_data(file_path):
     # file_path = 'lishui.csv'
     df = read_file(file_path)
-    df['k1'] = 0
     df['zbkzj'] = df['zbkzj'].astype(float)
     df['kbjj'] = df['kbjj'].astype(float)
 
     df = df[df['zbkzj'] != 0]
     # df['Date'] = pd.to_datetime(df['Date'])
 
-    df['整数位'] = df['k1'].apply(lambda s: str(1000 - int(1000 * s))[:-1])
-    df['小数位'] = df['k1'].apply(lambda s: str(1000 - int(1000 * s))[-1])
-    df['下浮率'] = df['k1'].apply(lambda s: str(round(100 - 100 * s, 2)))
+    # df['整数位'] = df['k1'].apply(lambda s: str(1000 - int(1000 * s))[:-1])
+    # df['小数位'] = df['k1'].apply(lambda s: str(1000 - int(1000 * s))[-1])
+    # df['下浮率'] = df['k1'].apply(lambda s: str(round(100 - 100 * s, 2)))
     # df['下浮率'] = df['下浮率'].astype(float)
-    df['下浮率'] = round(100 - 100 * df['kbjj'] / df['zbkzj'], 2)
+    # df['下浮率'] = round(100 - 100 * df['kbjj'] / df['zbkzj'], 2)
     df = df[df['下浮率'] > 6]
     df = df[df['下浮率'] < 12]
     return df
