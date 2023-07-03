@@ -17,7 +17,7 @@ def train_model_predict(df):
     d1 = df.dropna().reset_index(drop=True)
     X = d1.drop(columns=['下浮率'])
     y = d1['下浮率']
-    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=9)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=7)
     poly = PolynomialFeatures(degree=1)
 
     x_train = poly.fit_transform(X_train.values)
@@ -71,9 +71,41 @@ def record_predict(df_train, predict_value):
 
     xgb_mean = sum([rf.predict(poly_apply), kn.predict(poly_apply), xgb.predict(poly_apply)]) / 3
 
-    print(xgb.predict(poly_apply).tolist()[0],xgb_mean[0],res)
+    print(xgb.predict(poly_apply).tolist()[0], xgb_mean[0], res)
     return la.predict(poly_apply).tolist()[0], rf.predict(poly_apply).tolist()[0], dt.predict(poly_apply).tolist()[0], \
-        kn.predict(poly_apply).tolist()[0], res#, xgb.predict(poly_apply).tolist()[0],
+        kn.predict(poly_apply).tolist()[0], res  # , xgb.predict(poly_apply).tolist()[0],
+
+def predict(df, df_train):
+    df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].astype(float)
+    df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].fillna(0)
+    df = df[(df['k1'] > 0) & (df['k2'] > 0) & (df['k1'] < 1) & (df['k2'] < 1)]
+    df = df[df['zbkzj'] > df["kbjj"]]
+    df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
+    df = df[df['下浮率'] < 20]
+
+    df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(
+        0)
+    df = df.fillna('')
+    #
+    df['project_label'] = df['project_type'].apply(
+        lambda s: 0 if s == '公路工程' else 1 if s == '市政公用工程' else 2 if s == '建筑工程' else 3)
+    # df['project_label'] = 0
+    df['预测下浮率'] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']])[-1], axis=1)
+
+    df['result'] = abs(df['下浮率'] - df['预测下浮率'])
+
+    print(
+        f"下浮率误差1%以内命中率：{round(len(df[df['result'] < 1]) / len(df), 2) * 100}%，下浮率命中率：{round(len(df[df['result'] == 0]) / len(df), 2) * 100}%")
+
+    df['predict_k1'] = df['zbkzj'].apply(lambda x: huainan_kc(df_total, 'k1'))
+    df['k1_result'] = abs(df['k1'] - df['predict_k1'])
+    df['predict_k2'] = df['zbkzj'].apply(lambda x: huainan_kc(df_total, 'k2'))
+    df['k2_result'] = abs(df['k2'] - df['predict_k2'])
+
+    print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
+    print(f"k2命中率：{round(len(df[df['k2_result'] == 0]) / len(df), 2) * 100}%")
+
+    print(f"k1和k2命中率：{round(len(df[(df['k1_result'] == 0) & (df['k2_result'] == 0)]) / len(df), 2) * 100}%")
 
 
 ### 淮南市
@@ -82,6 +114,11 @@ def record_predict(df_train, predict_value):
 
 df_total = huainan_data()
 df_train = df_total[['zbkzj', 'project_type', '下浮率']]
+
+print(set(df_total['k1'].values.tolist()))
+print(set(df_total['k2'].values.tolist()))
+
+
 # county = 0
 # classify = 0
 # trade_method = 0
@@ -102,44 +139,19 @@ df_train = df_total[['zbkzj', 'project_type', '下浮率']]
 sql = "SELECT id,county,classify,project_type,zbkzj,k1,k2,kbjj,publish_time,source_website_address,numbers_bidders,trade_method FROM tender_bid_opening WHERE city = '淮南市' ORDER BY publish_time desc LIMIT 100"
 df = mysql_select_df(sql)
 
-df = df_total
-df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].astype(float)
-df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].fillna(0)
-df = df[(df['k1'] > 0) & (df['k2'] > 0) & (df['k1'] < 1) & (df['k2'] < 1)]
-df = df[df['zbkzj'] > df["kbjj"]]
-df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
-df = df[df['下浮率'] < 20]
+# df = df_total
+# predict(df, df_train)
 
-df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(0)
-df = df.fillna('')
-#
-df['project_label'] = df['project_type'].apply(
-    lambda s: 0 if s == '公路工程' else 1 if s == '市政公用工程' else 2 if s == '建筑工程' else 3)
-# df['project_label'] = 0
-df['预测下浮率'] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']])[-1], axis=1)
 
-df['result'] = abs(df['下浮率'] - df['预测下浮率'])
+# print(record_predict(df_train,[7480000,2])[-1])
 
-print(
-    f"下浮率误差1%以内命中率：{round(len(df[df['result'] < 1]) / len(df), 2) * 100}%，下浮率命中率：{round(len(df[df['result'] == 0]) / len(df), 2) * 100}%")
 
-df['predict_k1'] = df['zbkzj'].apply(lambda x: huainan_kc(df_total, 'k1'))
-df['k1_result'] = abs(df['k1'] - df['predict_k1'])
-df['predict_k2'] = df['zbkzj'].apply(lambda x: huainan_kc(df_total, 'k2'))
-df['k2_result'] = abs(df['k2'] - df['predict_k2'])
-
-print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
-print(f"k2命中率：{round(len(df[df['k2_result'] == 0]) / len(df), 2) * 100}%")
-
-print(f"k1和k2命中率：{round(len(df[(df['k1_result'] == 0) & (df['k2_result'] == 0)]) / len(df), 2) * 100}%")
 
 
 
 # df_test[['线性回归', "随机森林",'决策树','K近邻','XGB','预测值']] = df_test.apply(lambda x:record_predict(df_train,x['ZBKZJ']),axis=1,result_type='expand')
 # df[['线性回归', "随机森林",'决策树','K近邻','预测值']] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']]), axis=1)
-    # df.apply(lambda x: record_predict(df_train, x['zbkzj']), axis=1, result_type='expand')
-
-
+# df.apply(lambda x: record_predict(df_train, x['zbkzj']), axis=1, result_type='expand')
 
 
 # df.to_csv('淮南预测值对比.csv',index=False,encoding='utf-8')
@@ -149,13 +161,3 @@ print(f"k1和k2命中率：{round(len(df[(df['k1_result'] == 0) & (df['k2_result
 # plt.plot(range(len(df_test)),df_test[['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值']],marker = 'o',label = ['k1','线性回归', "随机森林",'决策树','K近邻','XGB','预测值'])
 # plt.legend()
 # plt.show()
-
-
-import numpy as np
-x = [1,2,9,5,6]
-b=x[1:4]
-sorted(b,reverse=True)
-
-
-b = np.array([1,2,3])*np.array([3,2,1])
-type(b)

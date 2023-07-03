@@ -72,7 +72,8 @@ def rule3(df, target_value):
     df = get_prediction_interval(df, target_value)
     return round(df['下浮率'].mean() + random.uniform(-0.6, 0.6), 1)
 
-def huainan_kc(df,choice):
+
+def huainan_kc(df, choice):
     length = int(len(df) * 0.1)
     df = df.sample(n=length)
     k1_list = df[choice].values.tolist()
@@ -80,6 +81,17 @@ def huainan_kc(df,choice):
         return max(k1_list, key=k1_list.count)
     else:
         return max(k1_list)
+
+
+def luan_kc(df):
+    length = int(len(df) * 0.1)
+    df = df.sample(n=length)
+    k1_list = df['k1'].values.tolist()
+    if k1_list.count(max(k1_list, key=k1_list.count)) == 1:
+        return max(k1_list, key=k1_list.count)
+    else:
+        return max(k1_list)
+
 
 def lishui_data(file_path):
     # file_path = 'lishui.csv'
@@ -128,7 +140,8 @@ def industy(s):
 def huainan_data():
     df = read_file("huainan.csv")
     # df = df[['county','classify','k1','k2','zbkzj','kbjj','numbers_bidders','trade_method','project_type']]
-    df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(0)
+    df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(
+        0)
     df = df.fillna('')
     # df = pd.read_csv('huainan.csv', encoding='utf-8')
 
@@ -173,8 +186,7 @@ def huainan_data():
     # plt.legend()
     # plt.show()
 
-    # df.to_csv('淮南预测值对比.csv', index=False, encoding='utf-8')
+    df.to_csv('淮南预测值对比.csv', index=False, encoding='utf-8')
 
     return df
-
 

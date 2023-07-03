@@ -8,6 +8,8 @@ df_total = luan_data()
 sql = "SELECT id,county,classify,project_type,zbkzj,k1,k2,kbjj,publish_time,source_website_address,numbers_bidders,trade_method FROM tender_bid_opening WHERE city = '六安市' ORDER BY publish_time desc LIMIT 100"
 df = mysql_select_df(sql)
 df = df[df['zbkzj'] > df["kbjj"]]
+df['kbjj'] = df['kbjj'].astype(float)
+df['zbkzj'] = df['zbkzj'].astype(float)
 df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
 df = df[df['下浮率'] > 6]
 df = df[df['下浮率'] < 12]
@@ -35,3 +37,15 @@ df['rule4'] = round(df['rule1']*0.3 + df['rule2']*0.4 + df['rule3']*0.3,2)
 df['rule4_result'] = abs(df['下浮率'] - df['rule4'])
 print(len(df[df['rule4_result'] < 1]), len(df[df['rule4_result'] == 0]))
 
+sql = "SELECT * FROM ggzyk_forecast WHERE city = '六安市'"
+df = mysql_select_df(sql)
+df = df[df['k1'] > 0.9]
+# print(len(df))
+df['predict_k1'] = df['k1'].apply(lambda x: huainan_kc(df, 'k1'))
+df['k1_result'] = abs(df['k1'] - df['predict_k1'])
+print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
+
+print(set(df['k1'].values.tolist()))
+
+plt.hist(df['k1'].count())
+plt.show()
