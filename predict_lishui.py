@@ -82,7 +82,7 @@ df_total = lishui_data('lishui.csv')
 file = '丽水市测试数据0629.csv'
 df = lishui_data(file)
 
-# df = df_total
+df = df_total
 print(len(df))
 
 df['rule1'] = df['zbkzj'].apply(lambda x: rule1(df_total))

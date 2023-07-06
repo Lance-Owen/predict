@@ -56,7 +56,8 @@ def rule1(df):
 
 def rule2(df, target_value):
     # df = get_prediction_interval(df,target_value)
-    length = int(len(df) * 0.3)
+    value_list = df['下浮率'].values.tolist()
+    length = int(len(df) * 0.4)
     df = df.sample(n=length)
     k1_list = df['下浮率'].values.tolist()
     k1_dict = {}
@@ -65,7 +66,18 @@ def rule2(df, target_value):
     return_k1 = 0
     for k, v in k1_dict.items():
         return_k1 += round(int(k) * int(v) / len(k1_list), 1)
-    return return_k1
+    if return_k1 in value_list:
+        return return_k1
+    else:
+        value_list = value_list+[return_k1]
+        value_list = sorted(value_list)
+        id = value_list.index(return_k1)
+        if abs(return_k1-value_list[id+1]) < abs(return_k1-value_list[id-1]):
+            return value_list[id+1]
+        else:
+            return value_list[id-1]
+
+    # return return_k1
 
 
 def rule3(df, target_value):
@@ -78,9 +90,18 @@ def huainan_kc(df, choice):
     df = df.sample(n=length)
     k1_list = df[choice].values.tolist()
     if k1_list.count(max(k1_list, key=k1_list.count)) == 1:
-        return max(k1_list, key=k1_list.count)
+        predict = max(k1_list, key=k1_list.count)
     else:
-        return max(k1_list)
+        predict = max(k1_list)
+    if predict in df[choice].values.tolist():
+        return predict
+    else:
+        value_list = df[choice].values.tolist().append(predict)
+        id = value_list.index(predict)
+        if abs(predict-value_list[id+1]) < abs(predict-value_list[id-1]):
+            return value_list[id+1]
+        else:
+            return value_list[id-1]
 
 
 def luan_kc(df):
@@ -140,8 +161,7 @@ def industy(s):
 def huainan_data():
     df = read_file("huainan.csv")
     # df = df[['county','classify','k1','k2','zbkzj','kbjj','numbers_bidders','trade_method','project_type']]
-    df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(
-        0)
+    df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(0)
     df = df.fillna('')
     # df = pd.read_csv('huainan.csv', encoding='utf-8')
 
@@ -190,3 +210,19 @@ def huainan_data():
 
     return df
 
+def chizhou_data():
+    sql = "SELECT id,source_website_address,city,zbkzj,kbjj,k1,k2,project_type FROM tender_bid_opening where city='池州市'"
+    df = mysql_select_df(sql)
+    df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].fillna(0)
+    df['zbkzj'] = df['zbkzj'].astype(float)
+    df['kbjj'] = df['kbjj'].astype(float)
+
+    df = df.fillna('')
+    df = df[(df['zbkzj'] > 100000) & (df['kbjj'] > 100000)]
+    df = df[df['zbkzj'] > df["kbjj"]]
+    df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
+    df = df[df['下浮率'] < 20]
+    project_label = {'水利水电工程': 1,  '公路工程': 2,  '市政公用工程': 3,  '建筑工程': 4,  '建筑装修装饰工程': 5}
+    df['project_label'] = df['project_type'].apply(lambda s: project_label[s] if s in project_label.keys() else 6)
+    # print(df)
+    return  df
