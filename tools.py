@@ -214,8 +214,8 @@ def chizhou_data():
     sql = "SELECT id,source_website_address,city,zbkzj,kbjj,k1,k2,project_type FROM tender_bid_opening where city='池州市'"
     df = mysql_select_df(sql)
     df[['k1', 'k2', 'zbkzj', 'kbjj']] = df[['k1', 'k2', 'zbkzj', 'kbjj']].fillna(0)
-    df['zbkzj'] = df['zbkzj'].astype(float)
-    df['kbjj'] = df['kbjj'].astype(float)
+    df[['zbkzj']] = df[['zbkzj']].astype(float)
+    df[['kbjj']] = df[['kbjj']].astype(float)
 
     df = df.fillna('')
     df = df[(df['zbkzj'] > 100000) & (df['kbjj'] > 100000)]
@@ -223,6 +223,7 @@ def chizhou_data():
     df['下浮率'] = 100 - round(df['kbjj'] / df['zbkzj'] * 100, 2)
     df = df[df['下浮率'] < 20]
     project_label = {'水利水电工程': 1,  '公路工程': 2,  '市政公用工程': 3,  '建筑工程': 4,  '建筑装修装饰工程': 5}
+    print(project_label)
     df['project_label'] = df['project_type'].apply(lambda s: project_label[s] if s in project_label.keys() else 6)
     # print(df)
     return  df

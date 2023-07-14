@@ -86,8 +86,8 @@ def predict_rate(df, df_train):
     df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']] = df[['k1', 'k2', 'zbkzj', 'kbjj', 'numbers_bidders']].fillna(0)
     df = df.fillna('')
     #
-    df['project_label'] = df['project_type'].apply(
-        lambda s: 0 if s == '公路工程' else 1 if s == '市政公用工程' else 2 if s == '建筑工程' else 3)
+    project_label = {'水利水电工程': 1, '公路工程': 2, '市政公用工程': 3, '建筑工程': 4, '建筑装修装饰工程': 5}
+    df['project_label'] = df['project_type'].apply(lambda s: project_label[s] if s in project_label.keys() else 6)
     # df['project_label'] = 0
     df['预测下浮率'] = df.apply(lambda x: record_predict(df_train, [x['zbkzj'], x['project_label']])[-1], axis=1)
 
@@ -172,8 +172,8 @@ df = df_total
 # predict_KC(df, df_total)
 
 # 单个预测
-print(huainan_kc(df,'k1'))
-print(huainan_kc(df,'k2'))
+print(huainan_kc(df, 'k1'))
+print(huainan_kc(df, 'k2'))
 
 print(record_predict(df_train, [3300000, 1])[-1])
 
