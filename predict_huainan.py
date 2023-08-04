@@ -167,15 +167,15 @@ df = mysql_select_df(sql)
 df = df_total
 
 # ## 总体预测
-# predict_rate(df, df_train)
+predict_rate(df, df_train)
 # ## 需要包含k1和k2
-# predict_KC(df, df_total)
+predict_KC(df, df_total)
 
-# 单个预测
-print(huainan_kc(df, 'k1'))
-print(huainan_kc(df, 'k2'))
-
-print(record_predict(df_train, [3300000, 1])[-1])
+# # 单个预测
+# print(huainan_kc(df, 'k1'))
+# print(huainan_kc(df, 'k2'))
+#
+# print(record_predict(df_train, [3300000, 1])[-1])
 
 
 

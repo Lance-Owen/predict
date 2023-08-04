@@ -6,7 +6,67 @@ from mysql_utils import *
 
 from sklearn import preprocessing
 import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.linear_model import Lasso
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
+from sklearn.preprocessing import PolynomialFeatures
+from sklearn.tree import DecisionTreeRegressor
+from xgboost import XGBRegressor as XGBR
+def train_model_predict(df,degree):
+    # 提取数据
+    df = df.dropna().reset_index(drop=True)
+    X = df.iloc[:,:-1]
+    y = df.iloc[:,-1]
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, shuffle=True, random_state=9)
+    poly = PolynomialFeatures(degree=degree)
 
+    x_train = poly.fit_transform(X_train.values)
+    x_test = poly.fit_transform(X_test)
+
+    # 线性回归
+    la = Lasso(alpha=0.1, max_iter=100000)
+    la.fit(x_train, y_train)
+    print(f'线性回归训练集得分：{round(la.score(x_train, y_train), 2)}')
+    print(f'线性回归测试集得分：{round(la.score(x_test, y_test), 2)}')
+
+    # 随机森林回归
+    rf = RandomForestRegressor(n_jobs=-1)
+    rf.fit(x_train, y_train)
+    print(f'随机森林回归训练集得分：{round(rf.score(x_train, y_train), 2)}')
+    print(f'随机森林回归测试集得分：{round(rf.score(x_test, y_test), 2)}')
+
+    # 决策树回归
+    dt = DecisionTreeRegressor(max_depth=6)
+    dt.fit(x_train, y_train)
+    print(f'决策树回归训练集得分：{round(dt.score(x_train, y_train), 2)}')
+    print(f'决策树回归测试集得分：{round(dt.score(x_test, y_test), 2)}')
+
+    # K近邻回归
+    kn = KNeighborsRegressor(n_neighbors=3, n_jobs=-1)
+    kn.fit(x_train, y_train)
+    print(f'k近邻回归测试集得分：{round(kn.score(x_test, y_test), 2)}')
+
+    # XGBbost
+    xgb = XGBR(n_estimators=100)
+    xgb.fit(x_train, y_train)
+    print(f"xgbbost测试集得分：{round(xgb.score(x_test,y_test),2)}") #你能想出这里应该返回什么模型评估指标么?
+
+    return la, rf, dt, kn, xgb
+
+
+def record_predict(df_train, x, degree):
+    la, rf, dt, kn, xgb = train_model_predict(df_train,degree)
+
+    poly = PolynomialFeatures(degree=degree)
+    apply = np.array(x).reshape(1, -1)
+    poly_apply = poly.fit_transform(apply)
+
+    predict_list = [la.predict(poly_apply).tolist()[0], rf.predict(poly_apply).tolist()[0],
+                    dt.predict(poly_apply).tolist()[0], kn.predict(poly_apply).tolist()[0],xgb.predict(poly_apply).tolist()[0]]
+
+    return predict_list
 
 def get_date(str_time: str):
     # str_time = 'http://lssggzy.lishui.gov.cn/art/2020/10/16/art_1229661956_138130.html'
@@ -49,9 +109,9 @@ def rule1(df):
     df = df.sample(n=length)
     k1_list = df['下浮率'].values.tolist()
     if k1_list.count(max(k1_list, key=k1_list.count)) == 1:
-        return max(k1_list, key=k1_list.count)
+        return round(max(k1_list, key=k1_list.count),2)
     else:
-        return max(k1_list)
+        return round(max(k1_list),2)
 
 
 def rule2(df, target_value):
@@ -65,7 +125,7 @@ def rule2(df, target_value):
         k1_dict[key] = k1_list.count(key)
     return_k1 = 0
     for k, v in k1_dict.items():
-        return_k1 += round(int(k) * int(v) / len(k1_list), 1)
+        return_k1 += round(int(k) * int(v) / len(k1_list), 2)
     if return_k1 in value_list:
         return return_k1
     else:
@@ -82,11 +142,11 @@ def rule2(df, target_value):
 
 def rule3(df, target_value):
     df = get_prediction_interval(df, target_value)
-    return round(df['下浮率'].mean() + random.uniform(-0.6, 0.6), 1)
+    return round(df['下浮率'].mean() + random.uniform(-0.6, 0.6), 2)
 
 
 def huainan_kc(df, choice):
-    length = int(len(df) * 0.1)
+    length = int(len(df)*0.2)
     df = df.sample(n=length)
     k1_list = df[choice].values.tolist()
     if k1_list.count(max(k1_list, key=k1_list.count)) == 1:

@@ -41,10 +41,10 @@ sql = "SELECT * FROM ggzyk_forecast WHERE city = '六安市'"
 df = mysql_select_df(sql)
 df = df[df['k1'] > 0.9]
 # # print(len(df))
-# df['predict_k1'] = df['k1'].apply(lambda x: huainan_kc(df, 'k1'))
-# df['k1_result'] = abs(df['k1'] - df['predict_k1'])
-# print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
-#
+df['predict_k1'] = df['k1'].apply(lambda x: huainan_kc(df, 'k1'))
+df['k1_result'] = abs(df['k1'] - df['predict_k1'])
+print(f"k1命中率：{round(len(df[df['k1_result'] == 0]) / len(df), 2) * 100}%")
+
 # print(set(df['k1'].values.tolist()))
 #
 # plt.hist(df['k1'].count())
