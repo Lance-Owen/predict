@@ -1,39 +1,29 @@
-from tools import *
+import matplotlib.pyplot as plt
+import pandas as pd
+import re
 
-# df = mysql_select_df("SELECT *  from ggzyk_forecast WHERE city = '淮南市'")
-# df.to_csv('淮南市数据.csv',index=False)
+plt.rcParams['font.sans-serif'] = ['SimHei']
+
 df = pd.read_csv('淮南市数据.csv')
-df[['k1', 'k2']] = df[['k1', 'k2']].fillna(0)
-# 计算方法一
-print('计算方法一数据'.center(100, '*'))
-df1 = df[(0.35 <= df['k1']) & (df['k1'] <= 0.6) & (df['k2'] > 0)]
+# df['publish_time'] = pd.to_datetime(df['publish_time'], format="%Y-%d-%m %H:%M:%S")
+df = df.sort_values(by=['publish_time'])
+print(df.columns)
+df['下浮率'] = 100-100*df['kbjj']/df['zbkzj']
 
-df1 = df1[(df1['ZBKZJ'] > df1['kbjj']) & (df1['kbjj'] / df1['ZBKZJ'] > 0.8)]
-print(df1['k1'].value_counts())
-print(df1['k2'].value_counts())
-print(len(df1))
-print('可用数据', len(df1))
+df1 = df[['zbkzj', 'k1', 'k2', '下浮率', 'publish_time', 'project_type']]
+df1[['zbkzj', 'k1', 'k2', '下浮率']].fillna(0, inplace=True)
+df1['project_type'].fillna('', inplace=True)
 
-# 计算方法二
-print('计算方法二数据'.center(100, '*'))
-df2 = df[(0 < df['k1']) & (0.6 > df['k1']) & (df['k2'] == 0)]
-df2 = df2[(df2['ZBKZJ'] > df2['kbjj']) & (df2['kbjj'] / df2['ZBKZJ'] > 0.8)]
-print(df2['k1'].value_counts())
-print('可用数据', len(df2))
 
-# 计算方法三，四
-print('计算方法三数据'.center(100, '*'))
-df3 = df[(df['k1'] < 0) & (df['k2'] < 0)]
-df3 = df3[(df3['ZBKZJ'] > df3['kbjj']) & (df3['kbjj'] / df3['ZBKZJ'] > 0.8)]
-df3['k'] = (df3['k1'] + df3['k2']) / 2
-print(df3['k'].value_counts())
-print(len(df3))
-print('可用数据', len(df3))
+def predict_rate(kzj, project_type, df1):
+    df1 = df1[
+        (df1['zbkzj'] >= 0.9 * kzj) & (df1['zbkzj'] <= 1.1 * kzj) & (df1['project_type'].str.contains(project_type))]
+    if len(df1)<=1:
+        return '无值'
+    return df1['下浮率'].mean()
 
-# 计算方法五
-print('计算方法五数据'.center(100, '*'))
-df5 = df[(0 < df['k1']) & (0.6 > df['k1']) & (df['k2'] < 0)]
-df5 = df5[(df5['ZBKZJ'] > df5['kbjj']) & (df5['kbjj'] / df5['ZBKZJ'] > 0.8)]
-print(df5['k1'].value_counts())
-print(df5['k2'].value_counts())
-print('可用数据', len(df5))
+
+kzj = 74153900
+project_type = '市政'
+print(predict_rate(kzj, project_type, df1))
+print(set(df1['project_type'].values.tolist()))
