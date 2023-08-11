@@ -21,8 +21,8 @@ def predict_rate(kzj, project_type, df1):
     return df1['下浮率'].mean()
 
 
-kzj = 23872646.41
-project_type = '建筑工程施工总承包'
+kzj = 41020100
+project_type = '市政'
 print(predict_rate(kzj, project_type, df1))
 
 # df['project_type'].fillna('', inplace=True)
